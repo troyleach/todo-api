@@ -19,6 +19,24 @@ app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
 
+// NOTES: users routes
+app.post("/users", (req, res) => {
+  const body = _.pick(req.body, ["email", "password"]);
+  const user = new User(body);
+  user
+    .save()
+    .then(() => {
+      return user.generateAuthToken();
+    })
+    .then(token => {
+      res.header("x-auth", token).send(user);
+    })
+    .catch(e => {
+      res.status(400).send(e);
+    });
+});
+
+// NOTES: Todos routes
 app.post("/todos", (req, res) => {
   var todo = new Todo({
     text: req.body.text
