@@ -162,3 +162,87 @@ describe("DELETE /todos/:id", () => {
       });
   });
 });
+
+describe("PATCH /todos/:id", () => {
+  it("should return a 404 for a invalid id", done => {
+    const id = 123;
+    request(app)
+      .patch(`/todos/${id}`)
+      .expect(404)
+      .expect(res => {
+        expect(res.body.errorMessage).toBe("ID is invalid");
+      })
+      .end(done);
+  });
+
+  it("should return a 404 not found", done => {
+    const id = new ObjectID();
+    request(app)
+      .patch(`/todos/${id}`)
+      .expect(404)
+      .expect(res => {
+        expect(res.body.errorMessage).toBe("Could not find todo");
+      })
+      .end(done);
+  });
+
+  it("expect to update a todo completed set to true", done => {
+    const todo = todos[0];
+    const params = {
+      text: "This has been updated",
+      completed: true
+    };
+
+    request(app)
+      .patch(`/todos/${todo._id}`)
+      .send(params)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo).toBeDefined();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(todo._id)
+          .then(todo => {
+            expect(todo.text).toBe(todo.text);
+            expect(res.body.todo.completed).toBe(true);
+            expect(res.body.todo.completedAt).toBeTruthy();
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+
+  it("expect to update a todo completed set to false", done => {
+    const todo = todos[0];
+    const params = {
+      text: "Completed set to false",
+      completed: false
+    };
+
+    request(app)
+      .patch(`/todos/${todo._id}`)
+      .send(params)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo).toBeDefined();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(todo._id)
+          .then(todo => {
+            expect(todo.text).toBe(todo.text);
+            expect(res.body.todo.completed).toBe(false);
+            expect(res.body.todo.completedAt).toBeNull();
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+});
