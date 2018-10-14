@@ -12,7 +12,9 @@ const todos = [
   },
   {
     _id: new ObjectID(),
-    text: "Second test todo"
+    text: "Second test todo",
+    completed: true,
+    completedAt: 333
   }
 ];
 
@@ -217,7 +219,7 @@ describe("PATCH /todos/:id", () => {
   });
 
   it("expect to update a todo completed set to false", done => {
-    const todo = todos[0];
+    const todo = todos[1];
     const params = {
       text: "Completed set to false",
       completed: false
