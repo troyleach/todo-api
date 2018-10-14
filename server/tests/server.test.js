@@ -116,3 +116,49 @@ describe("GET /todos/:id", () => {
       .end(done);
   });
 });
+
+describe("DELETE /todos/:id", () => {
+  it("should return a 404 for a invalid id", done => {
+    const id = 123;
+    request(app)
+      .delete(`/todos/${id}`)
+      .expect(404)
+      .expect(res => {
+        expect(res.body.errorMessage).toBe("ID is invalid");
+      })
+      .end(done);
+  });
+
+  it("should return a 404 not found", done => {
+    const id = new ObjectID();
+    request(app)
+      .delete(`/todos/${id}`)
+      .expect(404)
+      .expect(res => {
+        expect(res.body.errorMessage).toBe("Could not find todo");
+      })
+      .end(done);
+  });
+
+  it("expect to delete todo", done => {
+    const todo = todos[0];
+    request(app)
+      .delete(`/todos/${todo._id}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo.text).toBe(todo.text);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.find({})
+          .then(todos => {
+            expect(todos.length).toBe(1);
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+});

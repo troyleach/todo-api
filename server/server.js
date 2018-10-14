@@ -59,4 +59,22 @@ app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
 
+app.delete("/todos/:id", (req, res) => {
+  var id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return res.status(404).send({ errorMessage: "ID is invalid" });
+  }
+
+  Todo.findByIdAndRemove(id)
+    .then(todo => {
+      if (!todo) {
+        return res.status(404).send({ errorMessage: "Could not find todo" });
+      }
+      res.send({ todo });
+    })
+    .catch(error => {
+      res.status(400).send();
+    });
+});
+
 module.exports = { app };
