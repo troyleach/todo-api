@@ -7,6 +7,7 @@ const { mongoose } = require("./db/mongoose");
 
 const { Todo } = require("./models/todo");
 const { User } = require("./models/user");
+const { authenticate } = require("./middleware/authenticate");
 
 const { ObjectId } = require("mongodb");
 
@@ -17,6 +18,10 @@ app.use(bodyParser.json());
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
+});
+
+app.get("/users/me", authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 // NOTES: users routes
