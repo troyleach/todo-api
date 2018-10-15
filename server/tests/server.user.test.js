@@ -180,13 +180,12 @@ describe("POST /users/login", () => {
 });
 
 describe("POST /users/me/logout", () => {
-  it.only("expect positive result", done => {
+  it("expect positive result", done => {
     const token = users[0].tokens[0].token;
-    console.log("fucker", token);
 
     request(app)
-      .delete("/users/me/logout")
-      .send({ email, password })
+      .delete("/users/me/token")
+      .set("x-auth", token)
       .expect(200)
       .expect(res => {
         expect(res.headers["x-auth"]).toBeUndefined();
@@ -196,17 +195,9 @@ describe("POST /users/me/logout", () => {
           return done(err);
         }
 
-        User.findById(users[1]._id)
+        User.findById(users[0]._id)
           .then(user => {
-            const should = {
-              access: user.tokens[0].access,
-              token: user.tokens[0].token
-            };
-            const expectation = {
-              access: "auth",
-              token: res.headers["x-auth"]
-            };
-            expect(should).toEqual(expectation);
+            expect(user.tokens).toHaveLength(0);
             done();
           })
           .catch(e => done(e));
