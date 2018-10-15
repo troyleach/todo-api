@@ -178,3 +178,38 @@ describe("POST /users/login", () => {
       });
   });
 });
+
+describe("POST /users/me/logout", () => {
+  it.only("expect positive result", done => {
+    const token = users[0].tokens[0].token;
+    console.log("fucker", token);
+
+    request(app)
+      .delete("/users/me/logout")
+      .send({ email, password })
+      .expect(200)
+      .expect(res => {
+        expect(res.headers["x-auth"]).toBeUndefined();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id)
+          .then(user => {
+            const should = {
+              access: user.tokens[0].access,
+              token: user.tokens[0].token
+            };
+            const expectation = {
+              access: "auth",
+              token: res.headers["x-auth"]
+            };
+            expect(should).toEqual(expectation);
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+});
