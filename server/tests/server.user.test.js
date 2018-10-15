@@ -27,11 +27,13 @@ describe("POST /users", () => {
           return done(err);
         }
 
-        User.findOne({ email }).then(user => {
-          expect(user.email).toBe(email);
-          expect(user.password).not.toBe(email);
-          done();
-        });
+        User.findOne({ email })
+          .then(user => {
+            expect(user.email).toBe(email);
+            expect(user.password).not.toBe(email);
+            done();
+          })
+          .catch(e => done(e));
       });
   });
 
@@ -92,22 +94,40 @@ describe("GET /users/me", () => {
 
 describe("POST /users/login", () => {
   it("expect positive result", done => {
-    const email = users[0].email;
-    const password = users[0].password;
+    const email = users[1].email;
+    const password = users[1].password;
 
     request(app)
       .post("/users/login")
       .send({ email, password })
       .expect(200)
       .expect(res => {
-        expect(res.body.email).toBe(users[0].email);
-        expect(res.body._id).toBe(users[0]._id.toHexString());
+        expect(res.headers["x-auth"]).toBeDefined();
       })
-      .end(done);
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id)
+          .then(user => {
+            const should = {
+              access: user.tokens[0].access,
+              token: user.tokens[0].token
+            };
+            const expectation = {
+              access: "auth",
+              token: res.headers["x-auth"]
+            };
+            expect(should).toEqual(expectation);
+            done();
+          })
+          .catch(e => done(e));
+      });
   });
 
   it("expect negative result", done => {
-    const email = users[0].email;
+    const email = users[1].email;
     const password = "wrongPassword";
 
     request(app)
@@ -115,22 +135,46 @@ describe("POST /users/login", () => {
       .send({ email, password })
       .expect(400)
       .expect(res => {
+        expect(res.headers["x-auth"]).toBeUndefined();
         expect(res.body).toEqual({});
       })
-      .end(done);
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id)
+          .then(user => {
+            expect(user.tokens).toHaveLength(0);
+            done();
+          })
+          .catch(e => done(e));
+      });
   });
 
   it("expect negative result", done => {
     const email = "emailDoesNotExist@email.com";
-    const password = users[0].password;
+    const password = users[1].password;
 
     request(app)
       .post("/users/login")
       .send({ email, password })
       .expect(400)
       .expect(res => {
+        expect(res.headers["x-auth"]).toBeUndefined();
         expect(res.body).toEqual({});
       })
-      .end(done);
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id)
+          .then(user => {
+            expect(user.tokens).toHaveLength(0);
+            done();
+          })
+          .catch(e => done(e));
+      });
   });
 });
