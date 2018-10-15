@@ -94,8 +94,8 @@ describe("GET /users/me", () => {
 
 describe("POST /users/login", () => {
   it("expect positive result", done => {
-    const email = users[1].email;
-    const password = users[1].password;
+    const email = users[0].email;
+    const password = users[0].password;
 
     request(app)
       .post("/users/login")
@@ -109,11 +109,11 @@ describe("POST /users/login", () => {
           return done(err);
         }
 
-        User.findById(users[1]._id)
+        User.findById(users[0]._id)
           .then(user => {
             const should = {
-              access: user.tokens[0].access,
-              token: user.tokens[0].token
+              access: user.tokens[1].access,
+              token: user.tokens[1].token
             };
             const expectation = {
               access: "auth",
@@ -145,7 +145,7 @@ describe("POST /users/login", () => {
 
         User.findById(users[1]._id)
           .then(user => {
-            expect(user.tokens).toHaveLength(0);
+            expect(user.tokens).toHaveLength(1);
             done();
           })
           .catch(e => done(e));
@@ -171,7 +171,7 @@ describe("POST /users/login", () => {
 
         User.findById(users[1]._id)
           .then(user => {
-            expect(user.tokens).toHaveLength(0);
+            expect(user.tokens).toHaveLength(1);
             done();
           })
           .catch(e => done(e));
