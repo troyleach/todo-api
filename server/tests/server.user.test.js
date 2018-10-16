@@ -109,17 +109,23 @@ describe("POST /users/login", () => {
           return done(err);
         }
 
+        // Had a rough time with this one. one could do this
+        // expect(user.toObject().tokens[1]).toMatchObject({<stuff_goes_here})
         User.findById(users[0]._id)
           .then(user => {
-            const should = {
-              access: user.tokens[1].access,
-              token: user.tokens[1].token
-            };
-            const expectation = {
+            // const should = {
+            //   access: user.tokens[1].access,
+            //   token: user.tokens[1].token
+            // };
+            // const expectation = {
+            //   access: "auth",
+            //   token: res.headers["x-auth"]
+            // };
+            // expect(should).toEqual(expectation);
+            expect(user.toObject().tokens[1]).toMatchObject({
               access: "auth",
               token: res.headers["x-auth"]
-            };
-            expect(should).toEqual(expectation);
+            });
             done();
           })
           .catch(e => done(e));

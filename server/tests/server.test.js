@@ -168,9 +168,9 @@ describe("DELETE /todos/:id", () => {
           return done(err);
         }
 
-        Todo.find({})
-          .then(todos => {
-            expect(todos.length).toBe(1);
+        Todo.findById(todo._id)
+          .then(todo => {
+            expect(todo).toBeFalsy();
             done();
           })
           .catch(e => done(e));
